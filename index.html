@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Masa de Oro - Panadería</title>
+    
+    <!-- Tailwind por CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Configuración de colores de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bakery: { light: '#fdf6e3', primary: '#d97706', dark: '#78350f', accent: '#b45309' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- TU HOJA DE ESTILOS EXTERNA -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col relative">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2 text-bakery-primary cursor-pointer">
+                <i class="fa-solid fa-wheat-awn text-2xl"></i>
+                <h1 class="text-xl font-bold text-bakery-dark hidden sm:block">La Masa de Oro</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleCart()" class="relative text-bakery-dark hover:text-bakery-primary transition p-2 bg-amber-50 rounded-full">
+                    <i class="fa-solid fa-basket-shopping text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                </button>
+                
+                <!-- Este botón cambiará dinámicamente si el usuario ya inició sesión -->
+                <div id="auth-section">
+                    <a href="login.html" class="bg-bakery-primary text-white px-5 py-2 rounded-full text-sm font-semibold shadow hover:bg-bakery-accent transition">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
+        
+        <!-- Banner Informativo -->
+        <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-xl mb-8 flex items-center gap-3 shadow-sm">
+            <i class="fa-solid fa-circle-info text-2xl"></i>
+            <div>
+                <p class="font-bold">¡Bienvenido a nuestra tienda en línea!</p>
+                <p class="text-sm">Todos nuestros pedidos son exclusivamente para <strong>Recojo en Tienda</strong>. Selecciona tus panes y págalos aquí para no hacer fila.</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-end mb-6">
+            <div>
+                <h2 class="text-3xl font-bold text-bakery-dark">Panes Recién Horneados</h2>
+                <p class="text-gray-600">Revisa nuestro inventario en tiempo real.</p>
+            </div>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Los productos se inyectan con JS desde database_mock.js -->
+        </div>
+
+    </main>
+
+    <!-- Modal del Carrito (Slide de la derecha) -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity" onclick="toggleCart()"></div>
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-4 border-b flex justify-between items-center bg-bakery-light">
+            <h2 class="text-xl font-bold text-bakery-dark"><i class="fa-solid fa-basket-shopping mr-2"></i>Tu Orden</h2>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-red-500 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <!-- Lista de items en el carrito -->
+        <div id="cart-items" class="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50">
+            <!-- Se inyecta con JS -->
+        </div>
+        
+        <!-- Resumen y botón de pago -->
+        <div class="p-5 border-t bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div class="flex justify-between mb-2 text-sm text-gray-600">
+                <span>Subtotal</span>
+                <span id="cart-subtotal" class="font-medium">S/ 0.00</span>
+            </div>
+            <div class="flex justify-between mb-4 text-xl font-bold text-bakery-dark">
+                <span>Total</span>
+                <span id="cart-total">S/ 0.00</span>
+            </div>
+            <div class="bg-amber-50 text-amber-700 text-xs p-2 rounded mb-4 flex items-center justify-center gap-2 border border-amber-100">
+                <i class="fa-solid fa-person-walking-luggage"></i> Pedido para recoger en tienda
+            </div>
+            <button id="checkout-btn" onclick="proceedToCheckout()" class="w-full bg-bakery-dark text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2" disabled>
+                Ir a Pagar <i class="fa-solid fa-chevron-right text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-[70] flex items-center gap-2 font-medium">
+        <i class="fa-solid fa-circle-info text-bakery-primary" id="toast-icon"></i>
+        <span id="toast-text">Mensaje</span>
+    </div>
+
+    <!-- TUS SCRIPTS EXTERNOS -->
+    <!-- Asegúrate de cargar primero el mock (base de datos) y luego la lógica de la tienda -->
+    <script src="js/database_mock.js"></script>
+    <script src="js/store.js"></script>
+
+</body>
+</html>

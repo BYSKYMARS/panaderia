@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - La Masa de Oro</title>
+    
+    <!-- Tailwind por CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bakery: { light: '#fdf6e3', primary: '#d97706', dark: '#78350f', accent: '#b45309' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- TU HOJA DE ESTILOS EXTERNA -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col bg-gray-50">
+
+    <!-- Header Admin -->
+    <header class="bg-bakery-dark text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg"><i class="fa-solid fa-user-shield text-xl"></i></div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">Portal Admin</h1>
+                    <p class="text-[10px] text-amber-200 uppercase tracking-wider">La Masa de Oro</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 border-l border-white/20 pl-4">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Panadero&background=d97706&color=fff" alt="Admin" class="w-8 h-8 rounded-full border-2 border-amber-500">
+                    <div class="hidden md:block text-sm">
+                        <p class="font-bold" id="admin-name">Admin Principal</p>
+                        <button onclick="logout()" class="text-xs text-amber-200 hover:text-white transition">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Navegación Admin -->
+    <div class="bg-white border-b border-gray-200 shadow-sm sticky top-[60px] z-30">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto hide-scrollbar">
+            <button onclick="switchAdminTab('dashboard')" id="tab-dashboard" class="px-5 py-4 text-sm font-bold text-bakery-primary border-b-2 border-bakery-primary whitespace-nowrap transition">
+                <i class="fa-solid fa-chart-pie mr-2"></i>Resumen
+            </button>
+            <button onclick="switchAdminTab('orders')" id="tab-orders" class="px-5 py-4 text-sm font-bold text-gray-500 hover:text-bakery-dark border-b-2 border-transparent whitespace-nowrap transition">
+                <i class="fa-solid fa-list-check mr-2"></i>Gestión de Pedidos
+            </button>
+            <button onclick="switchAdminTab('catalog')" id="tab-catalog" class="px-5 py-4 text-sm font-bold text-gray-500 hover:text-bakery-dark border-b-2 border-transparent whitespace-nowrap transition">
+                <i class="fa-solid fa-boxes-stacked mr-2"></i>Catálogo (CRUD)
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6">
+        
+        <!-- VISTA: DASHBOARD -->
+        <div id="view-dashboard" class="block animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Resumen del Día</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-clock"></i></div>
+                    <div><p class="text-sm text-gray-500 font-semibold uppercase">Pedidos Pendientes</p><p class="text-3xl font-bold text-gray-800" id="stat-pending">0</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div><p class="text-sm text-gray-500 font-semibold uppercase">Total Ventas</p><p class="text-3xl font-bold text-gray-800" id="stat-income">S/ 0.00</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div><p class="text-sm text-gray-500 font-semibold uppercase">Panes Agotados</p><p class="text-3xl font-bold text-gray-800" id="stat-out">0</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: GESTIÓN DE PEDIDOS -->
+        <div id="view-orders" class="hidden animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <div><h2 class="text-2xl font-bold text-gray-800">Panel de Preparación</h2><p class="text-gray-600 text-sm">Gestiona los pedidos entrantes.</p></div>
+            </div>
+            <div id="admin-orders-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Se inyectan con JS -->
+            </div>
+        </div>
+
+        <!-- VISTA: CATÁLOGO (CRUD) -->
+        <div id="view-catalog" class="hidden animate-fade-in">
+            <div class="flex justify-between items-end mb-6">
+                <div><h2 class="text-2xl font-bold text-gray-800">Catálogo de Productos</h2><p class="text-gray-600 text-sm">Crea, edita o elimina los panes de la tienda.</p></div>
+                <button onclick="openProductModal()" class="bg-bakery-primary text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-bakery-accent transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-sm text-gray-500">
+                                <th class="p-4 font-semibold">Producto</th>
+                                <th class="p-4 font-semibold">Precio</th>
+                                <th class="p-4 font-semibold">Stock</th>
+                                <th class="p-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-catalog-table" class="divide-y divide-gray-100">
+                            <!-- Inyectado con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: CRUD DE PRODUCTOS -->
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+            <div class="p-5 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-gray-800" id="modal-title">Nuevo Producto</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="product-form" onsubmit="handleSaveProduct(event)" class="p-6 space-y-4">
+                <input type="hidden" id="prod-id"> <!-- ID Oculto para saber si editamos o creamos -->
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Pan</label>
+                    <input type="text" id="prod-name" required class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-bakery-primary">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio (S/)</label>
+                        <input type="number" step="0.10" min="0" id="prod-price" required class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-bakery-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock Inicial</label>
+                        <input type="number" min="0" id="prod-stock" required class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-bakery-primary">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Breve</label>
+                    <input type="text" id="prod-desc" required class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-bakery-primary">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+                    <input type="url" id="prod-img" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-bakery-primary">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t mt-4">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-bakery-primary text-white hover:bg-bakery-accent rounded-lg font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Producto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TUS SCRIPTS EXTERNOS -->
+    <!-- DESCOMENTAR EN TU PROYECTO LOCAL -->
+    <!-- <script src="js/database_mock.js"></script> -->
+    <!-- <script src="js/admin.js"></script> -->
+    
+    <!-- Para que funcione en esta vista previa, pegaré temporalmente los scripts aquí -->
+    <script src="js/database_mock.js"></script>
+    <script src="js/admin.js"></script>
+
+</body>
+</html>

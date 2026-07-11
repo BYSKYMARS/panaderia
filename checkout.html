@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasarela de Pago - La Masa de Oro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- SDK de Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+<body class="bg-amber-50 min-h-screen text-gray-800 font-sans pb-10">
+
+    <nav class="bg-amber-600 text-white p-4 shadow-md flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='index.html'" class="text-white hover:text-amber-200">
+                <i class="fa-solid fa-arrow-left text-xl"></i>
+            </button>
+            <h1 class="text-xl font-bold">Finalizar Compra</h1>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+        
+        <div class="bg-white p-6 rounded-xl shadow-sm h-fit">
+            <h2 class="text-lg font-bold mb-4 text-amber-900 border-b pb-2">Resumen de tu pedido</h2>
+            
+            <div id="checkout-items" class="space-y-4 mb-6"></div>
+
+            <div class="border-t pt-4 flex justify-between items-center font-bold text-lg mb-6">
+                <span>Total a Pagar:</span>
+                <span id="checkout-total" class="text-amber-600">S/ 0.00</span>
+            </div>
+
+            <!-- Datos obligatorios para el recojo -->
+            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-inner">
+                <h3 class="font-bold text-amber-900 mb-3 text-sm uppercase tracking-wide"><i class="fa-solid fa-clock mr-2"></i>Datos de Recojo</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1 font-semibold">Número de Teléfono <span class="text-red-500">*</span></label>
+                        <input type="tel" id="input-phone" required placeholder="Ej: 987654321" class="w-full p-2.5 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm bg-white">
+                        <p class="text-[10px] text-gray-500 mt-1">Te avisaremos por WhatsApp cuando esté listo.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1 font-semibold">Hora estimada de recojo <span class="text-red-500">*</span></label>
+                        <input type="time" id="input-time" required class="w-full p-2.5 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm bg-white">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <h2 class="text-lg font-bold mb-4 text-amber-900 border-b pb-2">Método de Pago</h2>
+            
+            <div class="flex gap-2 mb-6">
+                <button id="tab-card" onclick="togglePayment('card')" class="flex-1 py-2 rounded-lg border-2 border-amber-500 bg-amber-50 text-amber-700 font-bold transition-colors">
+                    Tarjeta
+                </button>
+                <button id="tab-mp" onclick="togglePayment('mp')" class="flex-1 py-2 rounded-lg border-2 border-[#009ee3] bg-blue-50 text-[#009ee3] font-bold transition-colors">
+                    Mercado Pago
+                </button>
+            </div>
+
+            <div id="form-card" class="hidden space-y-4">
+                <div><label class="block text-sm text-gray-600 mb-1">Número de Tarjeta</label><input type="text" placeholder="0000 0000 0000 0000" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"></div>
+                <div class="flex gap-4">
+                    <div class="flex-1"><label class="block text-sm text-gray-600 mb-1">Vencimiento</label><input type="text" placeholder="MM/YY" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"></div>
+                    <div class="flex-1"><label class="block text-sm text-gray-600 mb-1">CVV</label><input type="text" placeholder="123" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 mb-1">Titular</label><input type="text" placeholder="Nombre completo" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"></div>
+                <button id="btn-pay-card" onclick="processPayment('card')" class="w-full bg-amber-600 text-white p-3 rounded-lg font-bold hover:bg-amber-700 transition-colors mt-4">Pagar Ahora</button>
+            </div>
+
+            <div id="form-mp" class="block space-y-4">
+                <div class="p-4 bg-blue-50 text-blue-800 rounded-lg text-sm mb-4 border border-blue-100">
+                    <i class="fa-solid fa-shield-halved mr-2"></i> Serás redirigido a la plataforma segura de Mercado Pago.
+                </div>
+                
+                <button id="btn-mp-simulado" onclick="processPayment('mercadopago')" class="w-full bg-[#009ee3] hover:bg-[#008bcb] text-white p-3 rounded-lg font-bold transition-colors flex justify-center items-center gap-2">
+                    Pagar con Mercado Pago
+                </button>
+
+                <!-- Animación de carga mientras pide el ID al servidor -->
+                <div id="mp-redirecting" class="hidden flex-col items-center justify-center py-6 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-[#009ee3] mb-4"></i>
+                    <h3 class="font-bold text-gray-800 text-lg">Conectando con Mercado Pago...</h3>
+                    <p class="text-sm text-gray-500 mt-2">Por favor, no cierres esta ventana.</p>
+                </div>
+
+                <!-- CONTENEDOR OFICIAL DE MERCADO PAGO -->
+                <div id="wallet_container"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/database_mock.js"></script> 
+    <script src="js/checkout.js"></script>      
+</body>
+</html>

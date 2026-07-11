@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel - La Masa de Oro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bakery: { light: '#fdf6e3', primary: '#d97706', dark: '#78350f', accent: '#b45309' } } } } }
+    </script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col relative pb-20 sm:pb-0">
+
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-bakery-primary hover:text-bakery-dark transition">
+                <i class="fa-solid fa-wheat-awn text-2xl"></i>
+                <h1 class="text-xl font-bold text-bakery-dark hidden sm:block">La Masa de Oro</h1>
+            </a>
+            
+            <nav class="hidden md:flex bg-gray-100 rounded-full p-1">
+                <button onclick="switchClientTab('store')" id="tab-store" class="px-6 py-2 rounded-full text-sm font-bold bg-white text-bakery-dark shadow-sm transition">
+                    <i class="fa-solid fa-store mr-2"></i>Nueva Orden
+                </button>
+                <button onclick="switchClientTab('orders')" id="tab-orders" class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-bakery-dark transition">
+                    <i class="fa-solid fa-receipt mr-2"></i>Mis Pedidos
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="relative group">
+                    <button class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-full transition cursor-default">
+                        <div class="w-8 h-8 bg-bakery-primary text-white rounded-full flex items-center justify-center font-bold text-sm" id="user-avatar-initials">U</div>
+                        <span class="text-sm font-semibold hidden sm:block" id="user-name-display">Usuario</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="p-3 border-b border-gray-100 md:hidden flex flex-col gap-1">
+                            <button onclick="switchClientTab('store')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-bakery-primary rounded-lg transition font-medium"><i class="fa-solid fa-store mr-2 w-4"></i>Tienda</button>
+                            <button onclick="switchClientTab('orders')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-bakery-primary rounded-lg transition font-medium"><i class="fa-solid fa-receipt mr-2 w-4"></i>Mis Pedidos</button>
+                        </div>
+                        <div class="p-2">
+                            <button onclick="logout()" class="w-full text-left px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition flex items-center">
+                                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
+        
+        <div id="view-store" class="block animate-fade-in">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-bakery-dark">Hacer un nuevo pedido</h2>
+                    <p class="text-gray-600">Agrega panes a tu carrito y recógelos en tienda sin hacer fila.</p>
+                </div>
+            </div>
+            <!-- Grid de Productos -->
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <div id="view-orders" class="hidden animate-fade-in">
+            <h2 class="text-3xl font-bold text-bakery-dark mb-2">Mis Pedidos</h2>
+            <p class="text-gray-600 mb-6">Aquí puedes revisar el estado de las compras que has realizado.</p>
+
+            <div id="client-orders-container" class="space-y-4 max-w-4xl">
+                <!-- Se inyectan con JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/database_mock.js"></script>
+    <script src="js/store.js"></script> 
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('user-name-display').innerText = user.name;
+            document.getElementById('user-avatar-initials').innerText = user.name.charAt(0).toUpperCase();
+
+            // Ocultamos la vista de tienda para forzar que empiece en Mis Pedidos para esta prueba
+            switchClientTab('orders');
+        });
+
+        function switchClientTab(tabName) {
+            document.getElementById('view-store').classList.add('hidden');
+            document.getElementById('view-orders').classList.add('hidden');
+            
+            const tabStore = document.getElementById('tab-store');
+            const tabOrders = document.getElementById('tab-orders');
+
+            if (tabName === 'store') {
+                document.getElementById('view-store').classList.remove('hidden');
+                tabStore.className = "px-6 py-2 rounded-full text-sm font-bold bg-white text-bakery-dark shadow-sm transition";
+                tabOrders.className = "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-bakery-dark transition bg-transparent shadow-none";
+            } else if (tabName === 'orders') {
+                document.getElementById('view-orders').classList.remove('hidden');
+                renderClientOrders(); 
+                tabOrders.className = "px-6 py-2 rounded-full text-sm font-bold bg-white text-bakery-dark shadow-sm transition";
+                tabStore.className = "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-bakery-dark transition bg-transparent shadow-none";
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function renderClientOrders() {
+            const container = document.getElementById('client-orders-container');
+            container.innerHTML = '';
+            
+            const allOrders = typeof getOrders === 'function' ? getOrders() : [];
+            const myOrders = allOrders; // En producción, se filtra por cliente
+
+            if (myOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
+                        <i class="fa-solid fa-receipt text-5xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 font-medium">Aún no tienes pedidos registrados.</p>
+                        <button onclick="switchClientTab('store')" class="mt-4 text-bakery-primary font-bold hover:underline">Hacer mi primer pedido</button>
+                    </div>`;
+                return;
+            }
+
+            [...myOrders].reverse().forEach(order => {
+                let statusConfig = { bg: '', textc: '', icon: '', text: '' };
+                
+                if (order.status === 'pending') {
+                    statusConfig = { bg: 'bg-amber-100', textc: 'text-amber-800', icon: 'fa-clock', text: 'Pendiente de Separar' };
+                } else if (order.status === 'ready') {
+                    statusConfig = { bg: 'bg-green-100', textc: 'text-green-800', icon: 'fa-bell', text: '¡Listo para recoger!' };
+                } else {
+                    statusConfig = { bg: 'bg-gray-100', textc: 'text-gray-600', icon: 'fa-check-double', text: 'Entregado' };
+                }
+
+                const itemsText = order.items && order.items.length > 0 
+                                  ? order.items.map(i => `${i.qty}x ${i.name}`).join(', ')
+                                  : "Varios productos";
+
+                // AQUÍ SE AGREGA LA HORA DE RECOJO DE FORMA VISIBLE
+                const horaHtml = order.pickupTime 
+                    ? `<p class="text-sm text-gray-700 mt-2 bg-amber-50 inline-block px-3 py-1 rounded-md border border-amber-100"><i class="fa-regular fa-clock text-amber-500 mr-1"></i><strong>Recojo estimado:</strong> ${order.pickupTime}</p>` 
+                    : '';
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between gap-4 transition hover:shadow-md">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3 mb-2">
+                                <h4 class="font-bold text-lg text-gray-800">Orden #${order.id}</h4>
+                                <span class="${statusConfig.bg} ${statusConfig.textc} text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                    <i class="fa-solid ${statusConfig.icon}"></i> ${statusConfig.text}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-700"><strong>Productos:</strong> ${itemsText}</p>
+                            ${horaHtml}
+                            ${order.status === 'ready' ? `<p class="text-xs font-bold text-bakery-primary mt-2"><i class="fa-solid fa-location-dot"></i> Acércate al mostrador de la tienda y da tu número de orden.</p>` : ''}
+                        </div>
+                        <div class="flex flex-col justify-between items-start sm:items-end border-t sm:border-t-0 sm:border-l border-gray-100 pt-3 sm:pt-0 sm:pl-5 min-w-[120px]">
+                            <span class="text-xl font-black text-bakery-dark">S/ ${(order.total || 0).toFixed(2)}</span>
+                            ${order.status !== 'completed' ? `<button class="text-xs text-gray-500 hover:text-bakery-primary hover:underline mt-2 sm:mt-auto"><i class="fa-solid fa-qrcode mr-1"></i>Ver QR</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
