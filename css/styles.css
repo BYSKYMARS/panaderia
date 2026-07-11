@@ -1,0 +1,61 @@
+/*
+
+styles.css
+
+Hoja de estilos global para La Masa de Oro.
+
+NOTA SOBRE TAILWIND: Como en este MVP estás usando Tailwind vía CDN en el HTML,
+
+la configuración del tema (colores) que normalmente iría en tailwind.config.js
+
+se mantiene en el HTML. Sin embargo, todos tus estilos personalizados (CSS puro)
+
+deben ir aquí.
+*/
+
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Imagen de fondo para el Login */
+.bg-bakery-image {
+background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80');
+background-size: cover;
+background-position: center;
+}
+
+/* Ocultar barras de desplazamiento pero permitir scroll */
+.hide-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.hide-scrollbar {
+-ms-overflow-style: none;
+scrollbar-width: none;
+}
+
+/* Patrón sutil para el fondo del chat simulando WhatsApp (se usará luego) */
+.bg-wa-pattern {
+background-color: #e5ddd5;
+background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23d0c9c1' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+/* Animaciones simples */
+.animate-fade-in {
+animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animación para nuevo pedido en panel admin (se usará luego) */
+@keyframes highlight {
+0% { background-color: #fef3c7; }
+100% { background-color: white; }
+}
+
+.new-order-highlight {
+animation: highlight 3s ease-out;
+}
+
